@@ -1,0 +1,15 @@
+{#
+# Copyright (c) 2021 DPO Group
+#
+# Author: App Inlet (Pty) Ltd
+#
+# Released under the GNU General Public License
+#}
+<form name="dpo_pay_form" id="dpo_pay_form" class="form-horizontal text-left"
+      action="{{ payUrl }}" method="get">
+    <input type="hidden" name="ID" value="{{ ID }}"/>
+
+</form>
+<script type="text/javascript">
+  $('#dpo_pay_form').submit()
+</script>
