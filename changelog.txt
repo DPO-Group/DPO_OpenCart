@@ -1,4 +1,6 @@
 =====================================
 Date	  : Version: Description
 =====================================
+2022-04-11: v1.0.1: Hotfix whitespace issue.
+
 2021-07-30: v1.0.0 : Initial release.
