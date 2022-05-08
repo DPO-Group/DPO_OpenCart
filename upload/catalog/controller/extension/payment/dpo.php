@@ -39,7 +39,7 @@ class ControllerExtensionPaymentDpo extends Controller
         $order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
 
         if ($order_info) {
-            $preAmount = number_format($order_info['total'] / 100, 2, '.', '');
+            $preAmount = number_format($order_info['total'], 2, '.', '');
             $reference = filter_var($order_info['order_id'], FILTER_SANITIZE_STRING);
             $amount    = filter_var(
                 $preAmount,
