@@ -1,6 +1,6 @@
 # DPO_OpenCart
 
-## DPO Group plugin v1.0.1 for OpenCart v3.0.3.x
+## DPO Group plugin v1.0.2 for OpenCart v4.0.2.x
 
 This is the DPO Group plugin for OpenCart. Please feel free to contact
 the [DPO Group support team](https://dpogroup.com/contact-us/) should you require any assistance.
@@ -8,7 +8,7 @@ the [DPO Group support team](https://dpogroup.com/contact-us/) should you requir
 ## Installation
 
 Please navigate to the [releases page](https://github.com/DPO-Group/DPO_OpenCart/releases), download the
-latest release (v1.0.1) and unzip. You will then be able to follow the integration guide PDF which is included in the
+latest release (v1.0.2) and unzip. You will then be able to follow the integration guide PDF which is included in the
 zip.
 
 ## Collaboration
@@ -17,9 +17,6 @@ Please submit pull requests with any tweaks, features or fixes you would like to
 
 ## About DPO
 
-[DPO's](https://www.directpay.online/) highly secure payment platform makes payments simple by allowing businesses to
-accept credit cards, mobile payments and cross-border payments.
+[DPO's](https://dpogroup.com/) highly secure payment platform makes payments simple by allowing businesses to accept credit cards, mobile payments and cross-border payments.
 
-Our mission is to bring African businesses the most advanced online and offline payment processing technologies, while
-supporting growth and financial inclusion. The DPO Group payment processing solution allows merchants to accept payments
-online & offline, settle payments, receive cash advances and enjoy seamless payment processing.
+Our mission is to bring African businesses the most advanced online and offline payment processing technologies, while supporting growth and financial inclusion. The DPO Group payment processing solution allows merchants to accept payments online & offline, settle payments, receive cash advances and enjoy seamless payment processing.
