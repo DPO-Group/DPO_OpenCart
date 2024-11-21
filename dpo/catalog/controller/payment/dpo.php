@@ -10,13 +10,16 @@
 namespace Opencart\Catalog\Controller\Extension\Dpo\Payment;
 
 use Opencart\System\Engine\Controller;
-use Opencart\Catalog\Model\Extension\Dpo\Payment\DpoPay;
+use Dpo\Common\Dpo as DpoCommon;
+
+require_once DIR_EXTENSION . 'dpo/system/library/vendor/autoload.php';
 
 class Dpo extends Controller
 {
 
-    const CHECKOUT_ORDER      = 'checkout/order';
-    const INFORMATION_CONTACT = 'information/contact';
+    const  CHECKOUT_ORDER      = 'checkout/order';
+    const  INFORMATION_CONTACT = 'information/contact';
+    const  DPO_EXTENSION_DIR   = 'extension/dpo/payment/dpo';
     private $tableName = DB_PREFIX . 'dpo_transaction';
 
     /**
@@ -28,11 +31,10 @@ class Dpo extends Controller
     public function index()
     {
         unset($this->session->data['REFERENCE']);
-        $testMode     = $this->config->get('payment_dpo_testmode');
         $companyToken = $this->config->get('payment_dpo_merchant_token');
         $serviceType  = $this->config->get('payment_dpo_service_type');
 
-        $dpopay = new DpoPay($companyToken, $serviceType, $testMode);
+        $dpopay = new DpoCommon(false);
 
         $data['text_loading']   = $this->language->get('text_loading');
         $data['button_confirm'] = $this->language->get('button_confirm');
@@ -43,29 +45,33 @@ class Dpo extends Controller
         $order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
 
         if ($order_info) {
-            $preAmount = number_format($order_info['total'], 2, '.', '');
-            $reference = htmlspecialchars($order_info['order_id']);
-            $amount    = filter_var(
-                $preAmount,
+            $preAmount       = $this->currency->format(
+                $order_info['total'],
+                $order_info['currency_code'],
+                $order_info['currency_value'],
+                false
+            );
+            $amountFormatted = number_format($preAmount, 2, '.', '');
+            $reference       = htmlspecialchars($order_info['order_id']);
+            $amount          = filter_var(
+                $amountFormatted,
                 FILTER_SANITIZE_NUMBER_FLOAT,
                 FILTER_FLAG_ALLOW_FRACTION | FILTER_FLAG_ALLOW_THOUSAND
             );
-            $currency  = $order_info['currency_code'];
+            $currency        = $order_info['currency_code'];
+            $this->load->model(self::DPO_EXTENSION_DIR);
 
-            if ($currency == '' && $this->config->get('config_currency') != '') {
-                $currency = filter_var($this->config->get('config_currency'), FILTER_SANITIZE_STRING);
-            }
+            $currency = $this->model_extension_dpo_payment_dpo->getCurrency($currency);
 
             $returnUrl = filter_var(
                 $this->url->link('extension/dpo/payment/dpo|dpo_return', '', true),
                 FILTER_SANITIZE_URL
             );
-            $backUrl   = filter_var($this->url->link('checkout/checkout', '', true), FILTER_SANITIZE_URL);
             $email     = filter_var($order_info['email'], FILTER_SANITIZE_EMAIL);
 
             $data                       = [];
-            $data['companyToken']       = $dpopay->getCompanyToken();
-            $data['accountType']        = $dpopay->getServiceType();
+            $data['companyToken']       = $companyToken;
+            $data['serviceType']        = $serviceType;
             $data['paymentAmount']      = $amount;
             $data['paymentCurrency']    = $currency;
             $data['customerFirstName']  = $order_info['firstname'];
@@ -78,59 +84,38 @@ class Dpo extends Controller
                 ? $order_info['shipping_city'] : $order_info['payment_city'];
             $data['customerPhone']      = str_replace(['+', '-', '(', ')'], '', $order_info['telephone']);
             $data['redirectURL']        = $returnUrl;
-            $data['backUrl']            = $backUrl;
+            $data['backURL']            = $returnUrl;
             $data['customerEmail']      = $email;
             $data['companyRef']         = $reference;
             $data['payment_country']    = $order_info['payment_iso_code_2'];
             $data['payment_country_id'] = $order_info['payment_country_id'];
             $data['payment_postcode']   = !$order_info['payment_postcode']
                 ? $order_info['shipping_postcode'] : $order_info['payment_postcode'];
+            $data['companyAccRef']      = $reference;
 
             $tokens = $dpopay->createToken($data);
-            if ($tokens['success'] === true) {
-                $data['transToken'] = $tokens['transToken'];
 
-                $createDate = date('Y-m-d H:i:s');
-                $dpoData    = serialize($order_info);
-                $dpoSession = [
-                    'customer' => $this->customer,
-                ];
-                $session    = base64_encode(serialize($dpoSession));
+            $tokens = $this->model_extension_dpo_payment_dpo->createTransaction(
+                $tokens,
+                $data,
+                $order_info,
+                $this->tableName,
+                $dpopay
+            );
 
-                // Store order data
-                $query = <<<SQL
-                insert into 
-                    {$this->tableName} (customer_id, order_id, dpo_reference, dpo_data, dpo_session, date_created, date_modified)
-                values (
-                        '{$order_info['customer_id']}',
-                        '{$order_info['order_id']}',
-                        '{$data['transToken']}',
-                        '{$dpoData}',
-                        '{$session}',
-                        '{$createDate}',
-                        '{$createDate}'
-                )
-                SQL;
-                $this->db->query($query);
+            // Check if the transaction was successful
+            if (isset($tokens['payUrl'])) {
+                $data['payUrl'] = $tokens['payUrl'];
+                $data['ID']     = $tokens['transToken'];
 
-                $verify = $dpopay->verifyToken($data);
-                if ($verify != "") {
-                    $verify = new \SimpleXMLElement($verify);
-                    if ($verify->Result->__toString() === '900') {
-                        $data['ID']     = $tokens['transToken'];
-                        $data['payUrl'] = $dpopay->getDpoGateway();
-                    }
-                }
-
-                return $this->load->view('extension/dpo/payment/dpo', $data);
+                return $this->load->view(self::DPO_EXTENSION_DIR, $data);
             } else {
                 return $tokens['resultExplanation'] ?? 'There was a problem making a payment with DPO Pay';
             }
-            header('Location: ' . $data['backUrl']);
-            exit(0);
         }
         print_r(
-            'Order could not be found, order_id: ' . $this->session->data['order_id'] . '. Log support ticket to <a href="' . $this->url->link(
+            'Order could not be found, order_id: '
+            . $this->session->data['order_id'] . '. Log support ticket to <a href="' . $this->url->link(
                 self::INFORMATION_CONTACT
             ) . '">shop owner</a>'
         );
@@ -163,43 +148,53 @@ class Dpo extends Controller
         }
 
         $this->load->language('extension/dpo/checkout/dpo');
+        $this->load->model(self::DPO_EXTENSION_DIR);
+
         $statusDesc = '';
         $status     = '';
 
         if (isset($_GET['TransactionToken'])) {
             $transToken                      = $_GET['TransactionToken'];
-            $orderId                         = (int)substr($_GET['CompanyRef'], 0, -7);
+            $orderId                         = (int)$_GET['CompanyRef'];
             $this->session->data['order_id'] = $orderId;
 
-            $testMode     = $this->config->get('payment_dpo_testmode');
             $companyToken = $this->config->get('payment_dpo_merchant_token');
-            $serviceType  = $this->config->get('payment_dpo_service_type');
 
-            $dpopay = new DpoPay($companyToken, $serviceType, $testMode);
+            $dpopay = new DpoCommon(false);
 
             // Retrieve order data
-            $query         = "select * from {$this->tableName} where dpo_reference = '{$transToken}'";
-            $result        = $this->db->query($query);
-            $dpoSession    = unserialize(base64_decode($result->rows[0]['dpo_session']));
-            $orderInfo     = unserialize($result->rows[0]['dpo_data']);
-            $customerId    = (int)$orderInfo['customer_id'];
+            $query      = "select * from {$this->tableName} where dpo_reference = '{$transToken}'";
+            $result     = $this->db->query($query);
+            $dpoSession = unserialize(base64_decode($result->rows[0]['dpo_session']));
+            $orderInfo  = unserialize($result->rows[0]['dpo_data']);
+            $customerId = (int)$orderInfo['customer_id'];
 
             $data                 = [];
             $data['transToken']   = $transToken;
-            $data['companyToken'] = $dpopay->getCompanyToken();
+            $data['companyToken'] = $companyToken;
 
-            $status = $this->getStatus($dpopay, $data);
+            $status = $this->model_extension_dpo_payment_dpo->getStatus($dpopay, $data);
 
-            $DpoResponse = $this->getDpoResponse($status, $orderInfo);
-            $statusDesc  = $DpoResponse['statusDesc'];
+            $dpoResponse = $this->getDpoResponse($status, $orderInfo);
+            $statusDesc  = $dpoResponse['statusDesc'];
         }
 
-        $verifyResponseData = $dpopay->verifyToken($data);
-        $parseVerifyData = new \SimpleXMLElement($verifyResponseData);
+        $verifyResponseData = $dpopay->verifyToken(
+            [
+                'companyToken' => $companyToken,
+                'transToken'   => $data['transToken']
+            ]
+        );
+        $parseVerifyData    = new \SimpleXMLElement($verifyResponseData);
 
         if ($status == 1 && $_GET['CompanyRef'] == $parseVerifyData->CompanyRef->__toString()) {
             $data['heading_title'] = sprintf($this->language->get('heading_title'), $statusDesc);
             $this->document->setTitle($data['heading_title']);
+        } elseif ($status == 4 && $_GET['CompanyRef'] == $parseVerifyData->CompanyRef->__toString()) {
+            $data['heading_title'] = sprintf($this->language->get('heading_title'), $statusDesc);
+            $this->document->setTitle($data['heading_title']);
+            $products = $this->model_checkout_order->getProducts($orderId);
+            $this->model_extension_dpo_payment_dpo->restoreCart($products, $statusDesc, $orderId);
         } else {
             $data['heading_title'] = sprintf(
                 'Transaction status verification failed. Please contact the shop owner to confirm transaction status.'
@@ -263,8 +258,8 @@ class Dpo extends Controller
             $this->model_account_activity->addActivity('order_account', $activity_data);
         } else {
             $activity_data = array(
-                'name'        => $orderInfo['firstname'] . ' ' . $orderInfo['lastname'],
-                'order_id'    => $orderInfo['order_id'],
+                'name'     => $orderInfo['firstname'] . ' ' . $orderInfo['lastname'],
+                'order_id' => $orderInfo['order_id'],
             );
             $this->model_account_activity->addActivity('order_guest', $activity_data);
         }
@@ -272,21 +267,21 @@ class Dpo extends Controller
         unset($this->session->data['REFERENCE']);
 
         $data['orderStatusId'] = '7';
-        $TRANSACTION_STATUS    = $status;
+        $transactionStatus     = $status;
 
-        if (isset($TRANSACTION_STATUS)) {
+        if (isset($transactionStatus)) {
             $status = 'ok';
 
-            if ($TRANSACTION_STATUS == 0) {
+            if ($transactionStatus == 0) {
                 $data['orderStatusId'] = 1;
                 $data['statusDesc']    = 'pending';
-            } elseif ($TRANSACTION_STATUS == 1) {
+            } elseif ($transactionStatus == 1) {
                 $data['orderStatusId'] = 5;
                 $data['statusDesc']    = 'approved';
-            } elseif ($TRANSACTION_STATUS == 2) {
+            } elseif ($transactionStatus == 2) {
                 $data['orderStatusId'] = 8;
                 $data['statusDesc']    = 'declined';
-            } elseif ($TRANSACTION_STATUS == 4) {
+            } elseif ($transactionStatus == 4) {
                 $data['orderStatusId'] = 7;
                 $data['statusDesc']    = 'cancelled';
             }
@@ -295,7 +290,8 @@ class Dpo extends Controller
         } else {
             $data['orderStatusId']  = 1;
             $data['statusDesc']     = 'pending';
-            $data['resultsComment'] = 'Transaction status verification failed. Please contact the shop owner to confirm transaction status.';
+            $data['resultsComment'] = 'Transaction status verification failed. ' .
+                                      'Please contact the shop owner to confirm transaction status.';
         }
 
         $this->load->model(self::CHECKOUT_ORDER);
@@ -305,18 +301,20 @@ class Dpo extends Controller
             $data['resultsComment'],
             true
         );
-        unset($this->session->data['shipping_method']);
-        unset($this->session->data['shipping_methods']);
-        unset($this->session->data['payment_method']);
-        unset($this->session->data['payment_methods']);
-        unset($this->session->data['guest']);
-        unset($this->session->data['comment']);
-        unset($this->session->data['order_id']);
-        unset($this->session->data['coupon']);
-        unset($this->session->data['reward']);
-        unset($this->session->data['voucher']);
-        unset($this->session->data['vouchers']);
-        unset($this->session->data['totals']);
+        if($transactionStatus == 1) {
+            unset($this->session->data['shipping_method']);
+            unset($this->session->data['shipping_methods']);
+            unset($this->session->data['payment_method']);
+            unset($this->session->data['payment_methods']);
+            unset($this->session->data['guest']);
+            unset($this->session->data['comment']);
+            unset($this->session->data['order_id']);
+            unset($this->session->data['coupon']);
+            unset($this->session->data['reward']);
+            unset($this->session->data['voucher']);
+            unset($this->session->data['vouchers']);
+            unset($this->session->data['totals']);
+        }
 
         return $data;
     }
@@ -344,31 +342,6 @@ class Dpo extends Controller
         );
 
         return $breadcrumbs;
-    }
-
-    public function getStatus($dpopay, $data)
-    {
-        $status = null;
-        while ($status === null) {
-            $verify = $dpopay->verifyToken($data);
-            if ($verify != '') {
-                $verify = new \SimpleXMLElement($verify);
-                switch ($verify->Result->__toString()) {
-                    case '000':
-                        $status = 1;
-                        break;
-                    case '901':
-                        $status = 2;
-                        break;
-                    case '904':
-                    default:
-                        $status = 4;
-                        break;
-                }
-            }
-        }
-
-        return $status;
     }
 
     public function notify_handler()

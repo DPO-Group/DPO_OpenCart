@@ -135,25 +135,20 @@ QUERY;
             true
         );
 
-        $data['payment_dpo_total'] = $this->request->post['payment_dpo_total'] ?? $this->config->get(
-            'payment_dpo_total'
-        );
+        $data['payment_dpo_total'] = $this->request->post['payment_dpo_total']
+                                     ?? $this->config->get('payment_dpo_total');
 
-        $data['payment_dpo_order_status_id'] = $this->request->post['payment_dpo_order_status_id'] ?? $this->config->get(
-            'payment_dpo_order_status_id'
-        );
+        $data['payment_dpo_order_status_id'] = $this->request->post['payment_dpo_order_status_id']
+                                               ?? $this->config->get('payment_dpo_order_status_id');
 
-        $data['payment_dpo_success_order_status_id'] = $this->request->post['payment_dpo_success_order_status_id'] ?? $this->config->get(
-            'payment_dpo_success_order_status_id'
-        );
+        $data['payment_dpo_success_order_status_id'] = $this->request->post['payment_dpo_success_order_status_id']
+                                                       ?? $this->config->get('payment_dpo_success_order_status_id');
 
-        $data['payment_dpo_failed_order_status_id'] = $this->request->post['payment_dpo_failed_order_status_id'] ?? $this->config->get(
-            'payment_dpo_failed_order_status_id'
-        );
+        $data['payment_dpo_failed_order_status_id'] = $this->request->post['payment_dpo_failed_order_status_id']
+                                                      ?? $this->config->get('payment_dpo_failed_order_status_id');
 
-        $data['payment_dpo_cancelled_order_status_id'] = $this->request->post['payment_dpo_cancelled_order_status_id'] ?? $this->config->get(
-            'payment_dpo_cancelled_order_status_id'
-        );
+        $data['payment_dpo_cancelled_order_status_id'] = $this->request->post['payment_dpo_cancelled_order_status_id']
+                                                         ?? $this->config->get('payment_dpo_cancelled_order_status_id');
 
         $this->load->model('localisation/order_status');
 
@@ -167,25 +162,17 @@ QUERY;
 
         $data['geo_zones'] = $this->model_localisation_geo_zone->getGeoZones();
 
-        $data['payment_dpo_status'] = $this->request->post['payment_dpo_status'] ?? $this->config->get(
-            'payment_dpo_status'
-        );
+        $data['payment_dpo_status'] = $this->request->post['payment_dpo_status']
+                                      ?? $this->config->get('payment_dpo_status');
 
-        $data['payment_dpo_sort_order'] = $this->request->post['payment_dpo_sort_order'] ?? $this->config->get(
-            'payment_dpo_sort_order'
-        );
+        $data['payment_dpo_sort_order'] = $this->request->post['payment_dpo_sort_order']
+                                          ?? $this->config->get('payment_dpo_sort_order');
 
-        $data['payment_dpo_merchant_token'] = $this->request->post['payment_dpo_merchant_token'] ?? $this->config->get(
-            'payment_dpo_merchant_token'
-        );
+        $data['payment_dpo_merchant_token'] = $this->request->post['payment_dpo_merchant_token']
+                                              ?? $this->config->get('payment_dpo_merchant_token');
 
-        $data['payment_dpo_service_type'] = $this->request->post['payment_dpo_service_type'] ?? $this->config->get(
-            'payment_dpo_service_type'
-        );
-
-        $data['payment_dpo_testmode'] = $this->request->post['payment_dpo_testmode'] ?? $this->config->get(
-            'payment_dpo_testmode'
-        );
+        $data['payment_dpo_service_type'] = $this->request->post['payment_dpo_service_type']
+                                            ?? $this->config->get('payment_dpo_service_type');
 
         $data['header']      = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
