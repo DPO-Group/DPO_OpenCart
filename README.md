@@ -1,22 +1,39 @@
 # DPO_OpenCart
 
-## DPO Group plugin v1.0.2 for OpenCart v4.0.2.x
+## DPO Pay plugin v1.1.0 for OpenCart v4.0.2.x
 
-This is the DPO Group plugin for OpenCart. Please feel free to contact
-the [DPO Group support team](https://dpogroup.com/contact-us/) should you require any assistance.
+This is the DPO Pay plugin for OpenCart. Please feel free to contact
+the [DPO Pay support team](https://dpogroup.com/contact-us/) should you require any assistance.
 
 ## Installation
 
-Please navigate to the [releases page](https://github.com/DPO-Group/DPO_OpenCart/releases), download the
-latest release (v1.0.2) and unzip. You will then be able to follow the integration guide PDF which is included in the
-zip.
+1. **Download the Plugin**
+
+    - Visit the [releases page](https://github.com/DPO-Group/DPO_OpenCart/releases),
+      download [dpo.ocmod.zip](https://github.com/DPO-Group/DPO_OpenCart/releases/download/v1.1.0/dpo.ocmod.zip).
+
+2. **Install the Plugin**
+
+    - Login to your OpenCart admin area.
+    - Navigate to **Extensions** -> **Installer**.
+    - Under **Upload File** click the **Upload** button.
+    - Select the **dpo.ocmod.zip** file.
+    - Then click the **Install** button (green plus sign).
+
+3. **Activate the Plugin**
+
+    - Navigate to **Extensions** -> **Extensions**.
+    - Under the **Choose the extension type** section, select **Payments** from the dropdown.
+    - Once there, you'll notice your DPO Pay plugin for OpenCart is available in the list.
+    - Simply click the **Install** button (green plus sign).
+
+4. **Configure the Plugin**
+
+    - Now click the **Edit** button (blue pencil) and input your credentials as supplied by DPO, then update **Status**
+      to **Enabled**.
+    - Configure your desired order statuses on the **Order Status** tab. Finally, click the **Save** button near the
+      top.
 
 ## Collaboration
 
 Please submit pull requests with any tweaks, features or fixes you would like to share.
-
-## About DPO
-
-[DPO's](https://dpogroup.com/) highly secure payment platform makes payments simple by allowing businesses to accept credit cards, mobile payments and cross-border payments.
-
-Our mission is to bring African businesses the most advanced online and offline payment processing technologies, while supporting growth and financial inclusion. The DPO Group payment processing solution allows merchants to accept payments online & offline, settle payments, receive cash advances and enjoy seamless payment processing.

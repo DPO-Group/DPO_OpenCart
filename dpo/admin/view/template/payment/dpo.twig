@@ -64,20 +64,6 @@
                                 </div>
                             </div>
                             <div class="my-4 row align-items-center form-group">
-                                <label class="d-flex flex-row-reverse col-form-label col-sm-2 control-label" for="input-testmode">{{ entry_testmode }}</label>
-                                <div class="col-sm-9">
-                                    <select name="payment_dpo_testmode" id="input-testmode" class="form-control">
-                                        {% if payment_dpo_testmode %}
-                                            <option value="1" selected="selected">{{ text_enabled }}</option>
-                                            <option value="0">{{ text_disabled }}</option>
-                                        {% else %}
-                                            <option value="1">{{ text_enabled }}</option>
-                                            <option value="0" selected="selected">{{ text_disabled }}</option>
-                                        {% endif %}
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="my-4 row align-items-center form-group">
                                 <label class="d-flex flex-row-reverse col-form-label col-sm-2 control-label"
                                        for="input-geo-zone">{{ entry_geo_zone }}</label>
                                 <div class="col-sm-9">
