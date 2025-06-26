@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2024 DPO Group
+ * Copyright (c) 2025 DPO Group
  *
  * Author: App Inlet (Pty) Ltd
  *
@@ -15,7 +15,7 @@ use Opencart\System\Engine\Model;
 class Dpo extends Model
 {
 
-    public function getMethods($address, $total = null)
+    public function getMethods($address, $total = null): array
     {
         $this->load->language('extension/dpo/payment/dpo');
 
@@ -44,7 +44,7 @@ class Dpo extends Model
      * @param $order_info
      * @param string $tableName
      *
-     * @return bool
+     * @return array
      * @throws \Exception
      */
     public function createTransaction(
@@ -53,7 +53,7 @@ class Dpo extends Model
         $order_info,
         string $tableName,
         DpoCommon $dpopay
-    ): mixed {
+    ): array {
         if ($tokens['success'] === true) {
             $data['transToken'] = $tokens['transToken'];
 
@@ -110,7 +110,7 @@ class Dpo extends Model
     public function getCurrency($currency): mixed
     {
         if ($currency == '' && $this->config->get('config_currency') != '') {
-            $currency = filter_var($this->config->get('config_currency'), FILTER_SANITIZE_STRING);
+            $currency = trim(htmlspecialchars($this->config->get('config_currency'), ENT_QUOTES, 'UTF-8'));
         }
 
         return $currency;
@@ -123,18 +123,11 @@ class Dpo extends Model
             $verify = $this->verifyData($dpopay, $data);
             if ($verify != '') {
                 $verify = new \SimpleXMLElement($verify);
-                switch ($verify->Result->__toString()) {
-                    case '000':
-                        $status = 1;
-                        break;
-                    case '901':
-                        $status = 2;
-                        break;
-                    case '904':
-                    default:
-                        $status = 4;
-                        break;
-                }
+                $status = match ($verify->Result->__toString()) {
+                    '000' => 1,
+                    '901' => 2,
+                    default => 4,
+                };
             }
         }
 
@@ -147,7 +140,7 @@ class Dpo extends Model
      *
      * @return mixed
      */
-    public function verifyData($dpopay, $data)
+    public function verifyData($dpopay, $data): mixed
     {
         return $dpopay->verifyToken(
             [
@@ -157,7 +150,7 @@ class Dpo extends Model
         );
     }
 
-    public function restoreCart($products, $statusDesc, $orderId)
+    public function restoreCart($products, $statusDesc, $orderId): void
     {
         if ($statusDesc !== 'approved' && is_array($products)) {
             // Restore the cart which has already been cleared
@@ -169,6 +162,42 @@ class Dpo extends Model
                 }
                 $this->cart->add($product['product_id'], $product['quantity'], $option);
             }
+        }
+    }
+
+    /**
+     * Cleans up session data after successful transaction
+     * This method removes various checkout-related session data
+     * to prevent issues with subsequent purchases
+     *
+     * @return void
+     */
+    /**
+     * Cleans up session data after successful transaction
+     * This method removes various checkout-related session data
+     * to prevent issues with subsequent purchases
+     *
+     * @return void
+     */
+    public function cleanupSession(): void
+    {
+        $sessionKeys = [
+            'shipping_method',
+            'shipping_methods',
+            'payment_method',
+            'payment_methods',
+            'guest',
+            'comment',
+            'order_id',
+            'coupon',
+            'reward',
+            'voucher',
+            'vouchers',
+            'totals',
+        ];
+
+        foreach ($sessionKeys as $key) {
+            unset($this->session->data[$key]);
         }
     }
 }

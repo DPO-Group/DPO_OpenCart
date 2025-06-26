@@ -1,6 +1,6 @@
 # DPO_OpenCart
 
-## DPO Pay plugin v1.1.0 for OpenCart v4.0.2.x
+## DPO Pay plugin v1.2.0 for OpenCart v4.1.0.0
 
 This is the DPO Pay plugin for OpenCart. Please feel free to contact
 the [DPO Pay support team](https://dpogroup.com/contact-us/) should you require any assistance.
@@ -10,7 +10,7 @@ the [DPO Pay support team](https://dpogroup.com/contact-us/) should you require 
 1. **Download the Plugin**
 
     - Visit the [releases page](https://github.com/DPO-Group/DPO_OpenCart/releases),
-      download [dpo.ocmod.zip](https://github.com/DPO-Group/DPO_OpenCart/releases/download/v1.1.0/dpo.ocmod.zip).
+      download [dpo.ocmod.zip](https://github.com/DPO-Group/DPO_OpenCart/releases/download/v1.2.0/dpo.ocmod.zip).
 
 2. **Install the Plugin**
 

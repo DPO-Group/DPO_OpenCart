@@ -1,5 +1,11 @@
 # Changelog
 
+## [[1.2.0]](https://github.com/DPO-Group/DPO_OpenCart/releases/tag/v1.2.0)
+
+### Added
+
+- Compatibility update for Opencart 4.1.0.0.
+
 ## [[1.1.0]](https://github.com/DPO-Group/DPO_OpenCart/releases/tag/v1.1.0)
 
 ### Added
