@@ -1,5 +1,5 @@
 {#
-* Copyright (c) 2024 DPO Group
+* Copyright (c) 2025 DPO Group
 #
 # Author: App Inlet (Pty) Ltd
 #
@@ -38,11 +38,11 @@
                 <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-dpo"
                       class="form-horizontal">
 
-                    {#                    <ul class="nav nav-tabs">#}
-                    {#                        <li class="active"><a href="#tab-general" data-toggle="tab">{{ tab_general }}</a>#}
-                    {#                        </li>#}
-                    {#                        <li><a href="#tab-order-status" data-toggle="tab">{{ tab_order_status }}</a></li>#}
-                    {#                    </ul>#}
+                    {#                    <ul class="nav nav-tabs"> #}
+                    {#                        <li class="active"><a href="#tab-general" data-toggle="tab">{{ tab_general }}</a> #}
+                    {#                        </li> #}
+                    {#                        <li><a href="#tab-order-status" data-toggle="tab">{{ tab_order_status }}</a></li> #}
+                    {#                    </ul> #}
                     <div class="tab-content">
 
 
@@ -81,7 +81,8 @@
                                 </div>
                             </div>
                             <div class="my-4 row align-items-center form-group">
-                                <label class="d-flex flex-row-reverse col-form-label col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                                <label class="d-flex flex-row-reverse col-form-label col-sm-2 control-label"
+                                       for="input-status">{{ entry_status }}</label>
                                 <div class="col-sm-9">
                                     <select name="payment_dpo_status" id="input-status" class="form-control">
                                         {% if payment_dpo_status %}
